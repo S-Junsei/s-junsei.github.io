@@ -1,0 +1,33 @@
+name: Publish plain WorldGuess
+
+on:
+  push:
+    paths:
+      - .github/workflows/publish-worldguess-plain.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore plain HTML
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .github/worldguess-src/part*.txt | base64 -d | tar -xJ -C .
+          test -s worldguess/index.html
+          grep -q 'data-standalone="1"' worldguess/index.html
+      - name: Commit plain HTML
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add worldguess/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Publish plain Safari-compatible WorldGuess"
+          git push
