@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#020714">
+  <title>3D Earth</title>
+  <style>
+    *{box-sizing:border-box}html,body,#globe{width:100%;height:100%;margin:0;overflow:hidden;background:#020714;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;color:#fff}body{touch-action:none}.panel{position:fixed;z-index:5;top:max(14px,env(safe-area-inset-top));left:14px;width:min(310px,calc(100vw - 28px));padding:15px 16px;border:1px solid rgba(150,210,255,.22);border-radius:17px;background:rgba(4,12,28,.72);box-shadow:0 16px 45px rgba(0,0,0,.38);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}h1{font-size:22px;margin:0 0 5px}.sub{font-size:12px;line-height:1.55;margin:0 0 12px;color:#afc3d8}.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}button,select{width:100%;min-height:39px;border:1px solid rgba(150,210,255,.2);border-radius:11px;background:rgba(255,255,255,.07);color:#fff;padding:0 10px;font:inherit}button{cursor:pointer}button:active{transform:scale(.98)}select{margin-top:8px}.hint{position:fixed;z-index:5;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);padding:8px 12px;border-radius:999px;background:rgba(4,12,28,.67);border:1px solid rgba(150,210,255,.15);font-size:11px;color:#bfd0df;white-space:nowrap;backdrop-filter:blur(10px)}.coord{margin-top:9px;font-size:12px;color:#82d2ff;font-variant-numeric:tabular-nums}.loading{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#020714;transition:.4s}.loading.done{opacity:0;pointer-events:none}.spinner{width:46px;height:46px;border:2px solid rgba(120,200,255,.18);border-top-color:#70d2ff;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}@media(max-width:560px){.panel{width:245px;padding:12px}h1{font-size:19px}.sub{display:none}.hint{font-size:10px}}
+  </style>
+</head>
+<body>
+  <div id="globe"></div>
+  <div class="panel">
+    <h1>3D Earth</h1>
+    <p class="sub">指でドラッグして回転、ピンチで拡大縮小。地球上をタップすると緯度・経度を表示します。</p>
+    <div class="row">
+      <button id="rotate">自動回転：ON</button>
+      <button id="labels">都市：ON</button>
+    </div>
+    <select id="city">
+      <option value="">都市へ移動…</option>
+    </select>
+    <div id="coord" class="coord">緯度・経度：—</div>
+  </div>
+  <div class="hint">ドラッグ：回転　ピンチ：ズーム　タップ：座標</div>
+  <div id="loading" class="loading"><div class="spinner"></div></div>
+
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/globe.gl@2.41.12/dist/globe.gl.min.js"></script>
+  <script>
+    const cities=[
+      {name:'東京',lat:35.6762,lng:139.6503},
+      {name:'ロンドン',lat:51.5072,lng:-0.1276},
+      {name:'ニューヨーク',lat:40.7128,lng:-74.0060},
+      {name:'パリ',lat:48.8566,lng:2.3522},
+      {name:'シンガポール',lat:1.3521,lng:103.8198},
+      {name:'ドバイ',lat:25.2048,lng:55.2708},
+      {name:'シドニー',lat:-33.8688,lng:151.2093},
+      {name:'サンパウロ',lat:-23.5505,lng:-46.6333}
+    ];
+    const select=document.getElementById('city');
+    cities.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=c.name;select.appendChild(o)});
+
+    const globe=Globe()(document.getElementById('globe'))
+      .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+      .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
+      .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
+      .showAtmosphere(true)
+      .atmosphereColor('#69c9ff')
+      .atmosphereAltitude(.18)
+      .pointsData(cities)
+      .pointLat('lat').pointLng('lng')
+      .pointColor(()=> '#66d7ff')
+      .pointAltitude(.025).pointRadius(.17)
+      .labelsData(cities)
+      .labelLat('lat').labelLng('lng').labelText('name')
+      .labelSize(1.1).labelDotRadius(.28)
+      .labelColor(()=> 'rgba(220,245,255,.95)')
+      .labelResolution(2)
+      .onGlobeClick(({lat,lng})=>{
+        const ns=lat>=0?'N':'S', ew=lng>=0?'E':'W';
+        document.getElementById('coord').textContent=`${Math.abs(lat).toFixed(3)}° ${ns} / ${Math.abs(lng).toFixed(3)}° ${ew}`;
+      });
+
+    globe.pointOfView({lat:25,lng:135,altitude:2.15},0);
+    const controls=globe.controls();
+    controls.autoRotate=true;
+    controls.autoRotateSpeed=.55;
+    controls.enableDamping=true;
+    controls.dampingFactor=.08;
+    controls.minDistance=115;
+    controls.maxDistance=500;
+
+    let rotating=true, showingLabels=true;
+    document.getElementById('rotate').onclick=e=>{
+      rotating=!rotating;controls.autoRotate=rotating;e.target.textContent=`自動回転：${rotating?'ON':'OFF'}`;
+    };
+    document.getElementById('labels').onclick=e=>{
+      showingLabels=!showingLabels;
+      globe.labelsData(showingLabels?cities:[]).pointsData(showingLabels?cities:[]);
+      e.target.textContent=`都市：${showingLabels?'ON':'OFF'}`;
+    };
+    select.onchange=e=>{
+      if(e.target.value==='')return;
+      const c=cities[Number(e.target.value)];
+      controls.autoRotate=false;rotating=false;document.getElementById('rotate').textContent='自動回転：OFF';
+      globe.pointOfView({lat:c.lat,lng:c.lng,altitude:1.55},900);
+    };
+    function resize(){globe.width(innerWidth).height(innerHeight)}
+    addEventListener('resize',resize,{passive:true});resize();
+    setTimeout(()=>document.getElementById('loading').classList.add('done'),1300);
+  </script>
+</body>
+</html>
