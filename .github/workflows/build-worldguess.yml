@@ -1,0 +1,80 @@
+name: Build WorldGuess
+
+on:
+  push:
+    paths:
+      - .github/workflows/build-worldguess.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore game source
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .github/worldguess-src/part*.txt | base64 -d | tar -xJ -C .
+
+      - name: Download map and photos
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p worldguess/assets
+          python - <<'PYCODE'
+          from pathlib import Path
+          from urllib.parse import quote
+          from urllib.request import Request, urlopen
+
+          out = Path('worldguess/assets')
+          files = {
+              'tokyo.jpg': 'Skyscrapers_of_Shinjuku_2009_January.jpg',
+              'paris.jpg': 'La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques,_Paris_août_2014_(2).jpg',
+              'capetown.jpg': 'Camps_bay_(53460319478)_(cropped).jpg',
+              'reykjavik.jpg': 'Reykjavík,_view_from_Hallgrímskirkja_(2).jpg',
+              'sydney.jpg': 'Sydney_Opera_House_and_Harbour_Bridge_Dusk_(2)_2019-06-21.jpg',
+              'singapore.jpg': 'Marina_Bay_Singapore-3499.jpg',
+              'istanbul.jpg': 'Historical_peninsula_and_modern_skyline_of_Istanbul.jpg',
+              'mexicocity.jpg': 'Sobrevuelos_CDMX_HJ2A4913_(25514321687)_(cropped).jpg',
+              'marrakesh.jpg': 'Pavillon_Menaragärten.jpg',
+              'newyork.jpg': 'View_of_Empire_State_Building_from_Rockefeller_Center_New_York_City_dllu_(cropped).jpg',
+              'rio.jpg': 'Cidade_Maravilhosa.jpg',
+              'bangkok.jpg': '4Y1A1159_Bangkok_(33536795515).jpg',
+          }
+
+          headers = {'User-Agent': 'WorldGuessBuilder/1.0 (GitHub Pages demo)'}
+          for filename, commons_name in files.items():
+              url = 'https://commons.wikimedia.org/wiki/Special:Redirect/file/' + quote(commons_name, safe='') + '?width=1600'
+              request = Request(url, headers=headers)
+              with urlopen(request, timeout=60) as response:
+                  data = response.read()
+              if len(data) < 30000:
+                  raise RuntimeError(f'Image download too small: {filename} ({len(data)} bytes)')
+              (out / filename).write_bytes(data)
+              print(filename, len(data))
+
+          map_url = 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson'
+          request = Request(map_url, headers=headers)
+          with urlopen(request, timeout=60) as response:
+              data = response.read()
+          if len(data) < 100000:
+              raise RuntimeError('Natural Earth download failed')
+          (out / 'world.geojson').write_bytes(data)
+          print('world.geojson', len(data))
+          PYCODE
+
+      - name: Commit generated game
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add worldguess
+          git diff --cached --quiet && exit 0
+          git commit -m "Publish WorldGuess game"
+          git push
