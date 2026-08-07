@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#050811" />
+<title>レカマン数列ビジュアライザー</title>
+<style>
+:root{
+  --bg:#050811;--panel:#0d1322;--panel2:#121a2d;--text:#f4f7ff;--muted:#aeb9d2;
+  --cyan:#45c9ff;--pink:#ff58bd;--green:#58f6a9;--yellow:#ffd76a;--line:#53617e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:radial-gradient(circle at 50% -20%,#17213d 0,#050811 52%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",sans-serif;min-height:100%}
+body{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.app{max-width:1280px;margin:auto;padding:14px}
+header{display:flex;gap:14px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+h1{font-size:clamp(1.35rem,4vw,2rem);margin:0}.lead{color:var(--muted);font-size:.92rem;margin:.35rem 0 0;line-height:1.55}
+.badge{font-size:.8rem;color:var(--green);border:1px solid #2b8b62;background:#0c2d22;padding:6px 9px;border-radius:999px;white-space:nowrap}
+.grid{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(310px,.9fr);gap:12px}@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018));border:1px solid rgba(255,255,255,.09);border-radius:18px;overflow:hidden;box-shadow:0 15px 38px rgba(0,0,0,.35)}
+.canvasWrap{position:relative;background:#02050b;min-height:440px;height:min(62vh,620px);touch-action:none}
+canvas{width:100%;height:100%;display:block}
+.overlay{position:absolute;left:10px;right:10px;top:10px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;gap:8px}
+.hud{background:rgba(7,11,20,.78);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);padding:8px 10px;border-radius:12px;font-variant-numeric:tabular-nums;font-size:.86rem;line-height:1.45}
+.controls{padding:12px;display:grid;gap:10px}
+.row{display:grid;grid-template-columns:145px 1fr;gap:9px;align-items:center}.row3{display:grid;grid-template-columns:145px 1fr auto;gap:9px;align-items:center}@media(max-width:560px){.row,.row3{grid-template-columns:1fr}}
+label{color:var(--muted);font-size:.9rem}
+input,select,button{font:inherit}
+input[type=number],select{width:100%;min-width:0;background:#090f1c;color:var(--text);border:1px solid rgba(255,255,255,.13);border-radius:11px;padding:10px 11px}
+input[type=range]{width:100%;accent-color:var(--cyan)}
+.buttons{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}@media(max-width:650px){.buttons{grid-template-columns:repeat(2,minmax(0,1fr))}.buttons button:first-child{grid-column:span 2}}
+button{border:0;border-radius:12px;padding:11px 9px;color:white;font-weight:700;background:#1d7dff;cursor:pointer;min-height:44px}
+button.pink{background:#e743a8}button.ghost{background:#1a2232;border:1px solid rgba(255,255,255,.08)}button.green{background:#16976a}button:disabled{opacity:.45;cursor:not-allowed}
+.side{padding:13px;display:grid;gap:11px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:9px}.metric,.box{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px}.k{font-size:.8rem;color:var(--muted);margin-bottom:5px}.v{font-size:1.45rem;font-weight:800;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.reason{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;line-height:1.65;font-size:.9rem;margin:0;color:#e9efff}
+.seq{max-height:285px;overflow:auto;display:grid;gap:6px}.seq div{background:#0b1120;border:1px solid rgba(255,255,255,.065);border-radius:10px;padding:8px 9px;font-size:.86rem;line-height:1.45}.seq .active{border-color:var(--green);background:#0b2b21}
+.note{font-size:.8rem;color:var(--muted);line-height:1.55}
+.legend{display:flex;flex-wrap:wrap;gap:11px;color:var(--muted);font-size:.82rem}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+#error{display:none;color:#ffb5b5;background:#3a141a;border:1px solid #8e3946;padding:9px;border-radius:10px;font-size:.86rem;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div><h1>レカマン数列ビジュアライザー</h1><p class="lead">項数の上限は固定していません。指定した項まで順番に計算し、描画量だけを調整できます。</p></div>
+  <span class="badge">上限なし・Canvas描画</span>
+</header>
+<div id="error"></div>
+<div class="grid">
+<section class="card">
+  <div class="canvasWrap" id="canvasWrap">
+    <canvas id="canvas"></canvas>
+    <div class="overlay">
+      <div class="hud" id="hudLeft"></div>
+      <div class="hud" id="hudRight"></div>
+    </div>
+  </div>
+  <div class="controls">
+    <div class="row3"><label for="target">指定項まで進む</label><input id="target" type="number" min="0" step="1" inputmode="numeric" value="100"><button id="go" class="green">移動</button></div>
+    <div class="row"><label for="drawMode">描画範囲</label><select id="drawMode"><option value="all">全体（重い場合あり）</option><option value="5000">直近5,000本</option><option value="1000" selected>直近1,000本</option><option value="200">直近200本</option><option value="50">直近50本</option></select></div>
+    <div class="row3"><label for="speed">自動再生速度</label><input id="speed" type="range" min="15" max="1200" step="15" value="180"><span id="speedText">180 ms</span></div>
+    <div class="buttons">
+      <button id="play">▶ 再生</button><button id="pause" class="pink">⏸ 停止</button><button id="prev" class="ghost">← 1つ戻る</button><button id="next" class="ghost">→ 1つ進む</button><button id="reset" class="ghost">↺ 0へ</button>
+    </div>
+    <div class="legend"><span><i class="dot" style="background:var(--cyan)"></i>偶数ステップ</span><span><i class="dot" style="background:var(--pink)"></i>奇数ステップ</span><span><i class="dot" style="background:var(--green)"></i>現在位置</span><span><i class="dot" style="background:var(--yellow)"></i>現在の弧</span></div>
+  </div>
+</section>
+<aside class="card side">
+  <div class="metrics">
+    <div class="metric"><div class="k">現在の項番号</div><div class="v" id="nVal">0</div></div>
+    <div class="metric"><div class="k">現在の値</div><div class="v" id="aVal">0</div></div>
+    <div class="metric"><div class="k">計算済み</div><div class="v" id="computedVal">0</div></div>
+    <div class="metric"><div class="k">最大値</div><div class="v" id="maxVal">0</div></div>
+  </div>
+  <div class="box"><div class="k">このステップの判断</div><pre class="reason" id="reason"></pre></div>
+  <div class="box"><div class="k">周辺の項</div><div class="seq" id="sequence"></div></div>
+  <div class="note">大きな項へ飛ぶときは、その手前の項をすべて順番に計算します。数万〜数十万項では端末性能に応じて時間がかかります。「描画範囲」を直近200〜1,000本にすると軽くなります。</div>
+</aside>
+</div>
+</div>
+<script>
+'use strict';
+(() => {
+const $=id=>document.getElementById(id);
+const canvas=$('canvas'),wrap=$('canvasWrap'),ctx=canvas.getContext('2d',{alpha:false});
+const target=$('target'),drawMode=$('drawMode'),speed=$('speed'),speedText=$('speedText');
+let seq=[0],used=new Set([0]),reasons=['a₀ = 0\n初項なので 0 から開始'],current=0,maxSeen=0,timer=null,calculating=false;
+let panX=0,zoom=1,pointerDown=false,lastPX=0;
+function fail(e){const el=$('error');el.style.display='block';el.textContent='エラー: '+(e&&e.stack?e.stack:e)}
+window.addEventListener('error',e=>fail(e.error||e.message));
+function computeOne(){const n=seq.length,prev=seq[n-1],sub=prev-n;let val,why;if(sub>0&&!used.has(sub)){val=sub;why=`a${n-1} = ${prev}\nまず ${prev} − ${n} = ${sub}\n${sub} は正で未登場 → 採用\n\na${n} = ${val}`;}else{val=prev+n;const cause=sub<=0?'0以下':'すでに登場済み';why=`a${n-1} = ${prev}\nまず ${prev} − ${n} = ${sub}\n${sub} は${cause} → 不採用\n代わりに ${prev} + ${n} = ${val}\n\na${n} = ${val}`;}seq.push(val);used.add(val);reasons.push(why);if(val>maxSeen)maxSeen=val;return val}
+async function ensure(n){n=Math.max(0,Math.floor(Number(n)));if(!Number.isFinite(n))return;calculating=true;updateButtons();const chunk=4000;while(seq.length<=n){for(let i=0;i<chunk&&seq.length<=n;i++)computeOne();updateStatsOnly();await new Promise(r=>setTimeout(r,0));}calculating=false;updateButtons()}
+function fmt(x){return Number(x).toLocaleString('ja-JP')}
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);const r=wrap.getBoundingClientRect();canvas.width=Math.max(1,Math.round(r.width*dpr));canvas.height=Math.max(1,Math.round(r.height*dpr));canvas.style.width=r.width+'px';canvas.style.height=r.height+'px';ctx.setTransform(dpr,0,0,dpr,0,0);draw()}
+function range(){let count=drawMode.value==='all'?current:Number(drawMode.value);let start=Math.max(0,current-count);return {start,end:current}}
+function draw(){const W=wrap.clientWidth,H=wrap.clientHeight;ctx.fillStyle='#02050b';ctx.fillRect(0,0,W,H);const {start,end}=range();if(end<=0){drawAxis(0,10,W,H,38,H-48);drawDot(0,0,0,10,W,H,38,H-48,true);updatePanel();return}
+let min=Infinity,max=-Infinity;for(let i=start;i<=end;i++){const v=seq[i];if(v<min)min=v;if(v>max)max=v}if(!Number.isFinite(min)){min=0;max=10}let span=Math.max(10,max-min);let pad=span*.07+1;let viewMin=min-pad,viewMax=max+pad;const base=H-48,top=34,left=38,right=18;const sx=(W-left-right)/(viewMax-viewMin);const x=v=>left+(v-viewMin)*sx;drawAxis(viewMin,viewMax,W,H,left,base,x);
+const maxRadiusPx=(H-top-base)/-1;
+let arcScale=1;let maxDx=1;for(let i=Math.max(start+1,1);i<=end;i++)maxDx=Math.max(maxDx,Math.abs(x(seq[i])-x(seq[i-1])));arcScale=Math.min(1,(base-top-10)/(maxDx/2));
+for(let i=Math.max(start+1,1);i<=end;i++){const x1=x(seq[i-1]),x2=x(seq[i]),mid=(x1+x2)/2,r=Math.abs(x2-x1)/2,h=Math.max(1,r*arcScale);ctx.beginPath();ctx.moveTo(x1,base);ctx.quadraticCurveTo(mid,base-2*h,x2,base);ctx.strokeStyle=i===current?'#ffd76a':(i%2===0?'#45c9ff':'#ff58bd');ctx.lineWidth=i===current?3.6:Math.max(1.2,2.2-Math.log10(Math.max(1,end-start))*.25);ctx.globalAlpha=i===current?1:.78;ctx.stroke()}
+ctx.globalAlpha=1;for(let i=start;i<=end;i++){const is=i===current;ctx.beginPath();ctx.arc(x(seq[i]),base,is?5.5:2.5,0,Math.PI*2);ctx.fillStyle=is?'#58f6a9':'#dce5ff';ctx.fill()}
+updatePanel()}
+function drawAxis(vmin,vmax,W,H,left,base,xfn){ctx.globalAlpha=1;ctx.strokeStyle='#596786';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(left,base);ctx.lineTo(W-18,base);ctx.stroke();let rough=(vmax-vmin)/8;let p=Math.pow(10,Math.floor(Math.log10(Math.max(rough,1))));let step=[1,2,5,10].map(m=>m*p).find(s=>s>=rough)||10*p;let first=Math.ceil(vmin/step)*step;ctx.font='11px -apple-system,system-ui';ctx.textAlign='center';ctx.fillStyle='#aeb9d2';for(let t=first;t<=vmax;t+=step){let xx=xfn?xfn(t):left+(t-vmin)/(vmax-vmin)*(W-left-18);ctx.strokeStyle='rgba(255,255,255,.08)';ctx.beginPath();ctx.moveTo(xx,32);ctx.lineTo(xx,base+7);ctx.stroke();ctx.fillText(fmt(Math.round(t)),xx,base+22)}}
+function drawDot(){}
+function updateStatsOnly(){$('computedVal').textContent=fmt(seq.length-1);$('maxVal').textContent=fmt(maxSeen)}
+function updatePanel(){$('nVal').textContent=fmt(current);$('aVal').textContent=fmt(seq[current]??0);$('computedVal').textContent=fmt(seq.length-1);$('maxVal').textContent=fmt(maxSeen);$('reason').textContent=reasons[current]||'';$('hudLeft').innerHTML=`a<sub>${fmt(current)}</sub> = <b>${fmt(seq[current]??0)}</b>`;$('hudRight').innerHTML=`表示: ${fmt(range().start)}〜${fmt(current)}<br>計算済み: ${fmt(seq.length-1)}`;const box=$('sequence');let a=Math.max(0,current-8),b=Math.min(seq.length-1,current+8),html='';for(let i=a;i<=b;i++)html+=`<div class="${i===current?'active':''}"><b>a${fmt(i)} = ${fmt(seq[i])}</b></div>`;box.innerHTML=html;updateButtons()}
+function updateButtons(){for(const id of ['go','play','prev','next','reset'])$(id).disabled=calculating;$('pause').disabled=!timer;}
+async function goTo(n){stop();n=Math.max(0,Math.floor(Number(n)));if(!Number.isFinite(n))return;await ensure(n);current=n;target.value=n;draw()}
+function stop(){if(timer){clearInterval(timer);timer=null}updateButtons()}
+function play(){stop();timer=setInterval(async()=>{if(calculating)return;await ensure(current+1);current++;target.value=current;draw()},Number(speed.value));updateButtons()}
+$('go').onclick=()=>goTo(target.value);$('next').onclick=()=>goTo(current+1);$('prev').onclick=()=>goTo(Math.max(0,current-1));$('reset').onclick=()=>goTo(0);$('play').onclick=play;$('pause').onclick=stop;drawMode.onchange=draw;speed.oninput=()=>{speedText.textContent=speed.value+' ms';if(timer)play()};target.addEventListener('keydown',e=>{if(e.key==='Enter')goTo(target.value)});
+wrap.addEventListener('pointerdown',e=>{pointerDown=true;lastPX=e.clientX;wrap.setPointerCapture(e.pointerId)});wrap.addEventListener('pointerup',()=>pointerDown=false);wrap.addEventListener('pointercancel',()=>pointerDown=false);wrap.addEventListener('pointermove',e=>{if(!pointerDown)return;panX+=e.clientX-lastPX;lastPX=e.clientX});
+window.addEventListener('resize',resize);speedText.textContent=speed.value+' ms';resize();goTo(100);
+})();
+</script>
+</body>
+</html>
