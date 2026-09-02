@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="シェリングの分居モデルを操作しながら理解するインタラクティブ教材" />
+  <title>シェリングの分居モデル | Interactive Lab</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__inner">
+      <p class="eyebrow">INTERACTIVE SOCIAL SCIENCE LAB</p>
+      <h1>シェリングの分居モデル</h1>
+      <p class="hero__lead">個々人が「少しだけ同類の近くにいたい」と動くだけで、都市全体には強い分離が生まれうる。その過程を、自分で条件を変えて観察できます。</p>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="explain-grid" aria-label="モデルの要点">
+      <article class="explain-card">
+        <span class="step-no">01</span>
+        <h2>近所を見る</h2>
+        <p>各住民は周囲の住民だけを見ます。空き地は同類率の分母に含めません。</p>
+      </article>
+      <article class="explain-card">
+        <span class="step-no">02</span>
+        <h2>満足か判定</h2>
+        <p>同類率が「満足に必要な同類率」以上なら、その場所に留まります。</p>
+      </article>
+      <article class="explain-card">
+        <span class="step-no">03</span>
+        <h2>不満なら移動</h2>
+        <p>不満な住民だけが空き地へ移動します。これを繰り返すと全体の模様が変わります。</p>
+      </article>
+    </section>
+
+    <section class="lab" aria-label="シェリングモデル・シミュレーター">
+      <div class="sim-panel card">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">CITY</p>
+            <h2>都市の状態</h2>
+          </div>
+          <div class="legend" aria-label="凡例">
+            <span><i class="dot dot--a"></i>A</span>
+            <span><i class="dot dot--b"></i>B</span>
+            <span><i class="dot dot--empty"></i>空き地</span>
+            <span><i class="dot dot--unhappy"></i>不満</span>
+          </div>
+        </div>
+
+        <div class="board-frame">
+          <canvas id="boardCanvas" aria-label="住民配置のグリッド"></canvas>
+          <div id="boardOverlay" class="board-overlay" hidden></div>
+        </div>
+
+        <div class="transport" aria-label="シミュレーション操作">
+          <button id="resetButton" class="button button--secondary" type="button">初期化</button>
+          <button id="stepButton" class="button button--secondary" type="button">1ラウンド進める</button>
+          <button id="playButton" class="button button--primary" type="button" aria-pressed="false">▶ 連続再生</button>
+        </div>
+
+        <div class="status-line" id="statusLine" role="status" aria-live="polite"></div>
+      </div>
+
+      <aside class="control-panel card">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">PARAMETERS</p>
+            <h2>条件を変える</h2>
+          </div>
+        </div>
+
+        <div class="preset-row" aria-label="閾値プリセット">
+          <button class="preset" data-threshold="0.30" type="button">寛容 30%</button>
+          <button class="preset" data-threshold="0.50" type="button">中間 50%</button>
+          <button class="preset" data-threshold="0.70" type="button">厳格 70%</button>
+        </div>
+
+        <div class="control-group control-group--emphasis">
+          <label for="thresholdRange">満足に必要な同類率 <strong id="thresholdValue">40%</strong></label>
+          <input id="thresholdRange" type="range" min="0" max="100" step="5" value="40" />
+          <p class="help">例：40%なら、周囲の「住民」のうち4割以上が自分と同じグループなら満足。</p>
+        </div>
+
+        <div class="control-grid">
+          <div class="control-group">
+            <label for="sizeRange">グリッド <strong id="sizeValue">24×24</strong></label>
+            <input id="sizeRange" type="range" min="12" max="40" step="2" value="24" />
+          </div>
+
+          <div class="control-group">
+            <label for="vacancyRange">空き地率 <strong id="vacancyValue">15%</strong></label>
+            <input id="vacancyRange" type="range" min="5" max="40" step="1" value="15" />
+          </div>
+
+          <div class="control-group">
+            <label for="groupARange">Aの比率 <strong id="groupAValue">50%</strong></label>
+            <input id="groupARange" type="range" min="10" max="90" step="5" value="50" />
+          </div>
+
+          <div class="control-group">
+            <label for="speedRange">再生速度 <strong id="speedValue">4 round/s</strong></label>
+            <input id="speedRange" type="range" min="1" max="12" step="1" value="4" />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <label for="neighborhoodSelect">近傍</label>
+          <select id="neighborhoodSelect">
+            <option value="moore">Moore（周囲8マス）</option>
+            <option value="vonNeumann">von Neumann（上下左右4マス）</option>
+          </select>
+        </div>
+
+        <div class="field-row">
+          <label for="moveStrategySelect">移動ルール</label>
+          <select id="moveStrategySelect">
+            <option value="satisfying">満足できる空き地へ</option>
+            <option value="random">ランダムな空き地へ</option>
+          </select>
+        </div>
+
+        <label class="check-row">
+          <input id="wrapCheckbox" type="checkbox" />
+          <span>端をつなげる（トーラス境界）</span>
+        </label>
+
+        <div class="seed-row">
+          <label for="seedInput">Seed</label>
+          <input id="seedInput" type="text" value="schelling" autocomplete="off" spellcheck="false" />
+          <button id="newSeedButton" type="button" class="icon-button" title="新しいseedを作る" aria-label="新しいseedを作る">↻</button>
+        </div>
+        <p class="help">同じseedと条件なら、同じ初期配置を再現できます。</p>
+      </aside>
+    </section>
+
+    <section class="metrics" aria-label="指標">
+      <article class="metric-card">
+        <span>ラウンド</span>
+        <strong id="roundMetric">0</strong>
+        <small>移動を1回処理する単位</small>
+      </article>
+      <article class="metric-card">
+        <span>満足率</span>
+        <strong id="satisfactionMetric">—</strong>
+        <small>満足している住民 / 全住民</small>
+      </article>
+      <article class="metric-card">
+        <span>平均同類率</span>
+        <strong id="similarityMetric">—</strong>
+        <small>各住民の局所的な同類率の平均</small>
+      </article>
+      <article class="metric-card">
+        <span>不満な住民</span>
+        <strong id="unhappyMetric">—</strong>
+        <small id="movesMetric">累計移動 0</small>
+      </article>
+    </section>
+
+    <section class="analysis-grid">
+      <article class="card chart-card">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">HISTORY</p>
+            <h2>分離はどう進むか</h2>
+          </div>
+          <div class="chart-legend">
+            <span><i class="line-key line-key--sat"></i>満足率</span>
+            <span><i class="line-key line-key--sim"></i>平均同類率</span>
+          </div>
+        </div>
+        <canvas id="historyCanvas" class="history-canvas"></canvas>
+        <p class="interpretation" id="interpretationText"></p>
+      </article>
+
+      <article class="card inspector-card">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">INSPECT</p>
+            <h2>1人を詳しく見る</h2>
+          </div>
+        </div>
+        <div id="inspectorEmpty" class="inspector-empty">都市の住民をタップすると、その人が満足か不満かを近所の内訳から確認できます。</div>
+        <div id="inspectorContent" hidden>
+          <div class="resident-title">
+            <span id="residentBadge" class="resident-badge">A</span>
+            <div>
+              <strong id="residentStatus">満足</strong>
+              <small id="residentPosition">x=0, y=0</small>
+            </div>
+          </div>
+          <dl class="neighbor-stats">
+            <div><dt>同類</dt><dd id="sameCount">0</dd></div>
+            <div><dt>他グループ</dt><dd id="otherCount">0</dd></div>
+            <div><dt>空き地</dt><dd id="emptyCount">0</dd></div>
+            <div><dt>同類率</dt><dd id="residentSimilarity">0%</dd></div>
+          </dl>
+          <p id="residentFormula" class="formula"></p>
+        </div>
+      </article>
+    </section>
+
+    <section class="takeaway card">
+      <p class="panel-kicker">TAKEAWAY</p>
+      <h2>このモデルが示すのは「強い差別意識がなくても分離が起こりうる」ということ</h2>
+      <p>各住民は都市全体の分離を目標にしていません。局所的な満足条件に従って移動しているだけです。それでも、反復の結果として平均同類率が上がり、大きなまとまりが形成されることがあります。</p>
+      <p class="caution">ただし、これは現実社会をそのまま再現するモデルではありません。住宅価格、所得、制度、歴史、差別、交通、家族構成などを捨象した単純化モデルです。</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>Schelling segregation model — interactive educational implementation.</p>
+  </footer>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

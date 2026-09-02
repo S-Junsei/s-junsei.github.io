@@ -1,0 +1,9 @@
+{
+  "name": "schelling-segregation-model",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/model.test.mjs",
+    "serve": "python3 -m http.server 8000"
+  }
+}
