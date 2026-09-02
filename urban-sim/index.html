@@ -3,109 +3,150 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#0b1020" />
-  <title>Urban Lab — 簡易都市シミュレーション</title>
-  <link rel="stylesheet" href="https://rawcdn.githack.com/S-Junsei/free1/8476e5f8c8cee6d688accc96a38d90002bf16f0c/urban-sim/style.css" />
+  <meta name="theme-color" content="#09101b" />
+  <title>Urban Lab V2 — 都市シミュレーション</title>
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
-      <div>
-        <p class="eyebrow">URBAN LAB</p>
-        <h1>簡易都市シミュレーション</h1>
-        <p class="subtitle">住宅・商業・職場・駅・公園を配置して、人口・家賃・通勤・満足度の変化を観察します。</p>
+      <div class="brand-block">
+        <p class="eyebrow">URBAN LAB V2</p>
+        <div class="title-row">
+          <h1>都市シミュレーション</h1>
+          <span class="sim-badge" id="simBadge">停止中</span>
+        </div>
+        <p class="subtitle">道路網・住宅市場・雇用・通勤・地価・公共サービス・財政が相互作用するエージェント型都市モデル。</p>
       </div>
-      <div class="header-actions">
-        <button id="resetBtn" class="button ghost" type="button">初期化</button>
+      <div class="top-actions">
+        <div class="date-box"><span>現在</span><strong id="dateStat">2026年1月</strong></div>
+        <button id="saveBtn" class="button ghost" type="button">保存</button>
+        <button id="loadBtn" class="button ghost" type="button">読込</button>
+        <button id="resetBtn" class="button ghost danger-outline" type="button">初期化</button>
         <button id="playBtn" class="button primary" type="button">▶ 再生</button>
       </div>
     </header>
 
-    <section class="kpis" aria-label="都市指標">
-      <article class="kpi"><span>年</span><strong id="yearStat">0</strong><small>経過年数</small></article>
-      <article class="kpi"><span>人口</span><strong id="populationStat">0</strong><small>人</small></article>
-      <article class="kpi"><span>平均家賃</span><strong id="rentStat">0</strong><small>指数</small></article>
-      <article class="kpi"><span>平均通勤</span><strong id="commuteStat">0</strong><small>マス</small></article>
-      <article class="kpi"><span>満足度</span><strong id="satisfactionStat">0</strong><small>/ 100</small></article>
-      <article class="kpi"><span>住宅空室</span><strong id="vacancyStat">0</strong><small>%</small></article>
+    <section class="headline-kpis" aria-label="都市主要指標">
+      <article class="headline-card"><span>人口</span><strong id="populationStat">0</strong><small id="populationDelta">—</small></article>
+      <article class="headline-card"><span>市予算</span><strong id="budgetStat">¥0</strong><small id="balanceStat">収支 ¥0/月</small></article>
+      <article class="headline-card"><span>幸福度</span><strong id="happinessStat">0</strong><small>/ 100</small></article>
+      <article class="headline-card"><span>雇用率</span><strong id="employmentStat">0%</strong><small id="jobsStat">0 jobs</small></article>
+      <article class="headline-card"><span>平均通勤</span><strong id="commuteStat">0</strong><small>分</small></article>
+      <article class="headline-card"><span>渋滞</span><strong id="trafficStat">0</strong><small>/ 100</small></article>
+      <article class="headline-card"><span>平均地価</span><strong id="landValueStat">0</strong><small>指数</small></article>
+      <article class="headline-card"><span>CO₂ / 汚染</span><strong id="pollutionStat">0</strong><small>/ 100</small></article>
     </section>
 
     <section class="workspace">
-      <aside class="panel controls-panel">
+      <aside class="panel left-panel">
         <div class="panel-section">
-          <div class="section-heading">
-            <h2>建設</h2>
-            <span>マップをクリック</span>
+          <div class="section-heading"><h2>都市計画</h2><span id="toolHint">ドラッグで配置</span></div>
+          <div id="toolPalette" class="tool-grid" role="group" aria-label="都市計画ツール">
+            <button class="tool active" data-tool="inspect" type="button"><i class="tool-icon inspect">◎</i><span><b>調査</b><small>地点情報</small></span></button>
+            <button class="tool" data-tool="road" type="button"><i class="swatch road"></i><span><b>道路</b><small>¥800</small></span></button>
+            <button class="tool" data-tool="residential" type="button"><i class="swatch residential"></i><span><b>住宅地区</b><small>¥150</small></span></button>
+            <button class="tool" data-tool="commercial" type="button"><i class="swatch commercial"></i><span><b>商業地区</b><small>¥180</small></span></button>
+            <button class="tool" data-tool="industrial" type="button"><i class="swatch industrial"></i><span><b>工業地区</b><small>¥180</small></span></button>
+            <button class="tool" data-tool="office" type="button"><i class="swatch office"></i><span><b>オフィス</b><small>¥220</small></span></button>
+            <button class="tool" data-tool="park" type="button"><i class="swatch park"></i><span><b>公園</b><small>¥4,500</small></span></button>
+            <button class="tool" data-tool="school" type="button"><i class="swatch school"></i><span><b>学校</b><small>¥18,000</small></span></button>
+            <button class="tool" data-tool="hospital" type="button"><i class="swatch hospital"></i><span><b>病院</b><small>¥30,000</small></span></button>
+            <button class="tool" data-tool="station" type="button"><i class="swatch station"></i><span><b>駅</b><small>¥22,000</small></span></button>
+            <button class="tool tool-wide danger" data-tool="bulldoze" type="button"><i class="tool-icon">×</i><span><b>撤去</b><small>建物・道路を撤去</small></span></button>
           </div>
-          <div id="toolPalette" class="tool-grid" role="group" aria-label="建設ツール">
-            <button class="tool active" data-tool="residential" type="button"><i class="swatch residential"></i><span>住宅</span></button>
-            <button class="tool" data-tool="commercial" type="button"><i class="swatch commercial"></i><span>商業</span></button>
-            <button class="tool" data-tool="office" type="button"><i class="swatch office"></i><span>職場</span></button>
-            <button class="tool" data-tool="park" type="button"><i class="swatch park"></i><span>公園</span></button>
-            <button class="tool" data-tool="station" type="button"><i class="swatch station"></i><span>駅</span></button>
-            <button class="tool" data-tool="road" type="button"><i class="swatch road"></i><span>道路</span></button>
-            <button class="tool danger" data-tool="empty" type="button"><i class="swatch empty"></i><span>撤去</span></button>
+        </div>
+
+        <div class="panel-section">
+          <div class="section-heading"><h2>税率・政策</h2><span>毎月反映</span></div>
+          <label class="slider-label" for="incomeTax"><span>所得税</span><b id="incomeTaxLabel">9%</b></label>
+          <input id="incomeTax" type="range" min="3" max="18" value="9" step="1" />
+          <label class="slider-label" for="propertyTax"><span>固定資産税</span><b id="propertyTaxLabel">1.2%</b></label>
+          <input id="propertyTax" type="range" min="0.4" max="3" value="1.2" step="0.1" />
+          <div class="policy-list">
+            <label class="policy"><input id="policyTransit" type="checkbox" /><span><b>公共交通補助</b><small>駅効果↑ / ¥4,000月</small></span></label>
+            <label class="policy"><input id="policyAffordable" type="checkbox" /><span><b>住宅費補助</b><small>家賃負担↓ / 世帯数比例</small></span></label>
+            <label class="policy"><input id="policyGreen" type="checkbox" /><span><b>環境規制</b><small>工業汚染↓ / 雇用成長やや鈍化</small></span></label>
           </div>
         </div>
 
-        <div class="panel-section">
-          <div class="section-heading"><h2>表示</h2></div>
-          <label class="field-label" for="viewMode">マップ表示</label>
-          <select id="viewMode" class="select">
-            <option value="landuse">土地利用</option>
-            <option value="rent">家賃</option>
-            <option value="satisfaction">満足度</option>
-            <option value="density">人口密度</option>
-          </select>
-        </div>
-
-        <div class="panel-section">
-          <div class="section-heading"><h2>シミュレーション</h2></div>
-          <label class="field-label" for="speedRange">速度 <span id="speedLabel">1×</span></label>
-          <input id="speedRange" type="range" min="1" max="5" value="1" step="1" />
-          <button id="stepBtn" class="button full" type="button">1年進める</button>
-        </div>
-
-        <div class="panel-section info-box">
-          <strong>モデルの要点</strong>
-          <p>住民は「家賃・通勤・公園・駅・混雑」を評価し、不満が大きいと空いている住宅へ移転します。人気地区では家賃が上がります。</p>
+        <div class="panel-section compact-section">
+          <div class="section-heading"><h2>時間</h2><span id="speedLabel">1×</span></div>
+          <div class="time-controls">
+            <button id="stepBtn" class="button ghost" type="button">+1か月</button>
+            <input id="speedRange" type="range" min="1" max="8" value="1" step="1" />
+          </div>
         </div>
       </aside>
 
-      <section class="map-panel" aria-label="都市マップ">
-        <div class="map-toolbar">
-          <div class="legend" id="legend"></div>
-          <span id="runState" class="run-state">停止中</span>
-        </div>
-        <div class="canvas-wrap">
-          <canvas id="cityCanvas" aria-label="都市グリッド"></canvas>
-          <div id="cellTooltip" class="tooltip" hidden></div>
-        </div>
+      <section class="center-column">
+        <section class="map-panel">
+          <div class="map-toolbar">
+            <div class="layer-tabs" id="layerTabs">
+              <button class="layer active" data-layer="landuse">土地利用</button>
+              <button class="layer" data-layer="traffic">交通</button>
+              <button class="layer" data-layer="value">地価</button>
+              <button class="layer" data-layer="pollution">汚染</button>
+              <button class="layer" data-layer="happiness">幸福度</button>
+            </div>
+            <div class="map-meta"><span id="brushState">調査モード</span><span id="zoomState">36×36</span></div>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="cityCanvas" aria-label="都市マップ"></canvas>
+            <div id="tooltip" class="tooltip" hidden></div>
+            <div id="mapLegend" class="map-legend"></div>
+          </div>
+        </section>
+
+        <section class="dashboard-grid">
+          <article class="panel chart-card">
+            <div class="section-heading"><h2>都市トレンド</h2><span>過去48か月</span></div>
+            <canvas id="historyCanvas" aria-label="都市指標推移"></canvas>
+            <div class="chart-legend"><span><i class="line-dot pop"></i>人口</span><span><i class="line-dot happy"></i>幸福度</span><span><i class="line-dot traffic"></i>渋滞</span><span><i class="line-dot budget"></i>予算</span></div>
+          </article>
+
+          <article class="panel demand-card">
+            <div class="section-heading"><h2>土地需要</h2><span>民間開発</span></div>
+            <div class="demand-row"><span>住宅</span><div class="demand-track"><i id="demandR"></i></div><b id="demandRLabel">0</b></div>
+            <div class="demand-row"><span>商業</span><div class="demand-track"><i id="demandC"></i></div><b id="demandCLabel">0</b></div>
+            <div class="demand-row"><span>工業</span><div class="demand-track"><i id="demandI"></i></div><b id="demandILabel">0</b></div>
+            <div class="demand-row"><span>オフィス</span><div class="demand-track"><i id="demandO"></i></div><b id="demandOLabel">0</b></div>
+            <p class="explain" id="demandExplanation">道路接続・雇用・税率・地価・人口構成から需要を計算します。</p>
+          </article>
+        </section>
       </section>
 
-      <aside class="panel detail-panel">
+      <aside class="panel right-panel">
         <div class="panel-section">
           <div class="section-heading"><h2>選択地点</h2><span id="selectedCoord">—</span></div>
-          <div id="cellDetails" class="detail-list muted">マップ上のマスを選択してください。</div>
+          <div id="cellDetails" class="detail-stack muted">マップ上の地点を調査してください。</div>
         </div>
 
         <div class="panel-section">
-          <div class="section-heading"><h2>都市構成</h2></div>
-          <div id="composition" class="composition"></div>
+          <div class="section-heading"><h2>都市構造</h2><span>リアルタイム</span></div>
+          <div class="mini-stat-grid">
+            <div><span>住宅容量</span><b id="housingCapacityStat">0</b></div>
+            <div><span>空室率</span><b id="vacancyStat">0%</b></div>
+            <div><span>求人</span><b id="vacantJobsStat">0</b></div>
+            <div><span>公共交通率</span><b id="transitShareStat">0%</b></div>
+            <div><span>教育カバー</span><b id="schoolCoverageStat">0%</b></div>
+            <div><span>医療カバー</span><b id="healthCoverageStat">0%</b></div>
+          </div>
         </div>
 
         <div class="panel-section">
-          <div class="section-heading"><h2>観察ポイント</h2></div>
-          <ul class="tips">
-            <li>駅の近くに住宅を増やすと通勤は短くなるか</li>
-            <li>中心部に職場を集中させると家賃はどう動くか</li>
-            <li>公園を増やした地区に住民が集まるか</li>
-          </ul>
+          <div class="section-heading"><h2>ミッション</h2><span id="missionScore">0 / 4</span></div>
+          <div id="missions" class="mission-list"></div>
+        </div>
+
+        <div class="panel-section grow-section">
+          <div class="section-heading"><h2>都市レポート</h2><span id="eventCount">0件</span></div>
+          <div id="eventLog" class="event-log"></div>
         </div>
       </aside>
     </section>
   </main>
 
-  <script src="https://rawcdn.githack.com/S-Junsei/free1/8476e5f8c8cee6d688accc96a38d90002bf16f0c/urban-sim/app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
