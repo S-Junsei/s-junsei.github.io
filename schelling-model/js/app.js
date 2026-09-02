@@ -100,11 +100,37 @@ function setupBoardCanvas() {
   const rect = canvas.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
   const size = Math.max(280, Math.floor(Math.min(rect.width, rect.height || rect.width)));
-  canvas.width = Math.floor(size * dpr);
-  canvas.height = Math.floor(size * dpr);
+  const pixelSize = Math.max(1, Math.floor(size * dpr));
+
+  if (canvas.width !== pixelSize || canvas.height !== pixelSize) {
+    canvas.width = pixelSize;
+    canvas.height = pixelSize;
+  }
+
   const ctx = canvas.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   return { ctx, size };
+}
+
+function roundedRectPath(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(x, y, width, height, radius);
+    return;
+  }
+
+  const r = Math.min(Math.max(radius, 0), Math.abs(width) / 2, Math.abs(height) / 2);
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.arcTo(x + width, y, x + width, y + r, r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.arcTo(x + width, y + height, x + width - r, y + height, r);
+  ctx.lineTo(x + r, y + height);
+  ctx.arcTo(x, y + height, x, y + height - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
 }
 
 function drawBoard() {
@@ -124,8 +150,7 @@ function drawBoard() {
     const gap = Math.max(0.7, cell * 0.08);
     const radius = Math.max(1.6, cell * 0.16);
 
-    ctx.beginPath();
-    ctx.roundRect(px + gap, py + gap, cell - gap * 2, cell - gap * 2, radius);
+    roundedRectPath(ctx, px + gap, py + gap, cell - gap * 2, cell - gap * 2, radius);
     ctx.fillStyle = type === GROUP_A ? '#2166d1' : type === GROUP_B ? '#e15445' : '#dfe4ea';
     ctx.fill();
 
