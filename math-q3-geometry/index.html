@@ -1,178 +1,45 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>第3問 視覚解説 | 数学A 図形の性質</title>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f5f1"><meta name="description" content="数学Aの図形問題を、アからナまで順番に。等縮尺の作図と、実際に動かせる折り曲げで理解する。">
+<title>アからナまで、図でつなぐ。｜第3問 図形の性質</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M12 52V10L52 52Z' fill='%230c766e'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles-v2.css?v=2.0.0">
+<script defer src="geometry-v2.js?v=2.0.0"></script><script defer src="lesson-v2.js?v=2.0.0"></script>
 </head>
 <body>
-  <header class="hero">
-    <div class="hero-inner">
-      <p class="eyebrow">GitHub Pages 向け・静的サイト</p>
-      <h1>第3問の視覚解説</h1>
-      <p class="lead">
-        図形の関係が見えるように、各ステップを <strong>図 + 最小限の式</strong> で整理したページです。
-        単なる文字解説ではなく、<strong>なぜそう見えるのか</strong> を追える構成にしています。
-      </p>
-      <div class="hero-tags">
-        <span>数学A</span>
-        <span>図形の性質</span>
-        <span>円</span>
-        <span>角の二等分線</span>
-        <span>空間図形</span>
-      </div>
-      <nav class="quick-nav">
-        <a href="#setup">基本図形</a>
-        <a href="#e-point">点E</a>
-        <a href="#f-point">点F</a>
-        <a href="#g-point">点G</a>
-        <a href="#volume">体積</a>
-      </nav>
-    </div>
-  </header>
-
-  <main class="container">
-    <section class="summary card">
-      <h2>最終結果一覧</h2>
-      <div class="answer-grid">
-        <div><span>AC</span><strong>2√10</strong></div>
-        <div><span>CD</span><strong>√10 / 5</strong></div>
-        <div><span>AE</span><strong>3CE</strong></div>
-        <div><span>CE</span><strong>5 / 2</strong></div>
-        <div><span>∠BDA</span><strong>90°</strong></div>
-        <div><span>DF / FB</span><strong>1 / 2</strong></div>
-        <div><span>AG / AB</span><strong>5 / 8</strong></div>
-        <div><span>体積</span><strong>21√10 / 40</strong></div>
-      </div>
-    </section>
-
-    <section id="setup" class="step-section">
-      <div class="step-copy">
-        <p class="step-label">STEP 1</p>
-        <h2>基本図形を座標で見る</h2>
-        <p>
-          まず図形を見やすくするために、B=(0,0), C=(2,0), A=(0,6) とおくと、
-          △ABC は直角三角形になります。
-          線分 BC を直径とする円と AC の交点が D です。
-        </p>
-        <div class="math-box">
-          <p><strong>AC = √(6² + 2²) = √40 = 2√10</strong></p>
-          <p>また、AB は円への接線なので、方べきの定理より <strong>AB² = AD・AC</strong></p>
-          <p>36 = AD・2√10 より <strong>AD = 9√10 / 5</strong></p>
-          <p>したがって <strong>CD = AC - AD = √10 / 5</strong></p>
-        </div>
-      </div>
-      <div class="diagram-card">
-        <div id="diagram-setup" class="diagram"></div>
-      </div>
-    </section>
-
-    <section id="e-point" class="step-section reverse">
-      <div class="step-copy">
-        <p class="step-label">STEP 2</p>
-        <h2>点Eは「角の二等分線」で決まる</h2>
-        <p>
-          条件 ∠BAE = 2∠BAC から、AC は △ABE における ∠BAE の二等分線です。
-          しかも C は辺 BE 上にあります。
-        </p>
-        <div class="math-box">
-          <p>角の二等分線の定理より <strong>BC : CE = BA : AE</strong></p>
-          <p>2 : CE = 6 : AE より <strong>AE = 3CE</strong></p>
-          <p>さらに角の二等分線の長さの公式 <strong>AC² = AB・AE - BC・CE</strong> を使うと</p>
-          <p>40 = 6AE - 2CE = 18CE - 2CE = 16CE</p>
-          <p>よって <strong>CE = 5 / 2</strong>、したがって <strong>AE = 15 / 2</strong></p>
-        </div>
-      </div>
-      <div class="diagram-card">
-        <div id="diagram-e" class="diagram"></div>
-      </div>
-    </section>
-
-    <section id="f-point" class="step-section">
-      <div class="step-copy">
-        <p class="step-label">STEP 3</p>
-        <h2>点Fでは「合同」が見える</h2>
-        <p>
-          F は直線 BD と直線 AE の交点です。ここで D は AC 上にあるので、
-          ∠BAD = ∠BAC です。また ∠DAF = ∠BAE - ∠BAC = ∠BAC となるため、
-          <strong>∠BAD = ∠DAF</strong> が成り立ちます。
-        </p>
-        <div class="math-box">
-          <p>D は直径 BC の円周上にあるので <strong>∠BDC = 90°</strong></p>
-          <p>A, D, C は一直線上だから <strong>∠BDA = 90°</strong></p>
-          <p>さらに B, D, F は一直線上より、<strong>∠ADF = 90°</strong></p>
-          <p>よって △ABD と △AFD は、</p>
-          <p><strong>∠BAD = ∠DAF</strong>、<strong>∠BDA = ∠ADF</strong>、<strong>AD 共通</strong> で合同</p>
-          <p>したがって <strong>BD = DF</strong>。B-D-F が一直線なので <strong>FB = BD + DF = 2DF</strong></p>
-          <p>つまり <strong>DF / FB = 1 / 2</strong></p>
-        </div>
-      </div>
-      <div class="diagram-card">
-        <div id="diagram-f" class="diagram"></div>
-      </div>
-    </section>
-
-    <section id="g-point" class="step-section reverse">
-      <div class="step-copy">
-        <p class="step-label">STEP 4</p>
-        <h2>内心Iから点Gの比を読む</h2>
-        <p>
-          I は △ABE の内心なので、EI は ∠AEB の二等分線です。
-          その EI と AB の交点が G です。
-        </p>
-        <div class="math-box">
-          <p>EB = BC + CE = 2 + 5/2 = <strong>9/2</strong></p>
-          <p>角の二等分線の定理より <strong>AG : GB = AE : EB</strong></p>
-          <p>= 15/2 : 9/2 = 5 : 3</p>
-          <p>よって <strong>AG / AB = 5 / (5+3) = 5 / 8</strong></p>
-        </div>
-      </div>
-      <div class="diagram-card">
-        <div id="diagram-g" class="diagram"></div>
-      </div>
-    </section>
-
-    <section id="volume" class="step-section">
-      <div class="step-copy">
-        <p class="step-label">STEP 5</p>
-        <h2>折り曲げた後は「底面積 × 高さ」</h2>
-        <p>
-          AC に沿って折り曲げると、F は F′ に移ります。問題の条件より ∠BDF′ = 90°。
-          もともと D は AC 上にあり、DF は AC に垂直な方向として見られるため、折り曲げ後の F′D は
-          底面 BCDG に垂直な高さとみなせます。
-        </p>
-        <div class="math-box">
-          <p>△BCD は直角三角形なので</p>
-          <p><strong>BD² = BC² - CD² = 4 - 2/5 = 18/5</strong></p>
-          <p>よって <strong>BD = 3√10 / 5</strong></p>
-          <p>合同より <strong>DF = BD = 3√10 / 5</strong>。したがって高さも <strong>3√10 / 5</strong></p>
-          <p>底面積は <strong>[BCDG] = [BCD] + [BDG] = 3/5 + 81/40 = 21/8</strong></p>
-          <p>よって体積</p>
-          <p><strong>V = (1/3) × (21/8) × (3√10/5) = 21√10 / 40</strong></p>
-        </div>
-      </div>
-      <div class="diagram-card">
-        <div id="diagram-volume" class="diagram"></div>
-      </div>
-    </section>
-
-    <section class="card takeaway">
-      <h2>この問題の見どころ</h2>
-      <ul>
-        <li><strong>接線と円</strong> → 方べきの定理で CD を出す</li>
-        <li><strong>∠BAE = 2∠BAC</strong> → AC が角の二等分線だと見る</li>
-        <li><strong>合同</strong> → △ABD ≡ △AFD から DF / FB = 1 / 2</li>
-        <li><strong>内心</strong> → EI が角の二等分線だから AG / AB を一発で出せる</li>
-        <li><strong>折り曲げ</strong> → 3D に見えても最後は底面積と高さ</li>
-      </ul>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <p>このページは GitHub Pages でそのまま公開できる静的サイトです。</p>
-  </footer>
-
-  <script src="script.js"></script>
-</body>
-</html>
+<header class="topbar"><a class="brand" href="#ac/0"><span class="brandmark">△</span> 図形の実験室</a><span class="course">数学A · 図形の性質 · 第3問</span><button id="problemBtn" class="quiet">問題の条件</button></header>
+<main>
+<section class="intro"><div><div class="eyebrow">VISUAL GEOMETRY / 02</div><h1>アからナまで、<span>図でつなぐ。</span></h1><p>一度に全部は描かない。いま必要な関係を、一つずつ。</p></div><div class="intro-note"><span class="small-dot"></span> 平面図は縦横同じ縮尺<br><span class="small-dot amber"></span> 最後は紙を折って立体へ</div></section>
+<nav id="chapters" class="chapters" aria-label="解答欄の順に移動"></nav>
+<section class="workspace" aria-label="図形と解説">
+<div class="visual-card">
+ <div class="canvas-top"><div><span id="figureBadge" class="pill">平面図</span><span id="figureTitle">直角三角形ABC</span></div><button id="zoomBtn" class="quiet" hidden>D付近を拡大</button></div>
+ <div id="canvasWrap"><svg id="diagram" role="img" aria-labelledby="svgTitle svgDesc"><title id="svgTitle">図形の解説</title><desc id="svgDesc">各段階で必要な辺・角を強調した正確な図形。</desc></svg><div id="cameraHint" hidden>ドラッグで視点を回す</div></div>
+ <div id="figureLegend" class="figure-legend"></div>
+ <div id="foldControls" class="fold-controls" hidden>
+   <div class="control-line"><label for="foldRange">折り曲げる角度 <output id="foldValue">0°</output></label><button id="playFold" class="quiet">▶ 折ってみる</button></div>
+   <input id="foldRange" type="range" min="0" max="90" step="1" value="0" aria-label="ACを軸に折る角度">
+   <div class="preset-row"><button data-fold="0">0° · 平ら</button><button data-fold="45">45°</button><button data-fold="90">90° · 直角に折る</button></div>
+   <div class="measure-row"><span>∠BDF′ <b id="actualAngle">180°</b></span><span>高さ <b id="actualHeight">0</b></span></div>
+ </div>
+ <div id="viewControls" class="view-controls" hidden><button data-view="oblique" class="quiet">斜めから</button><button data-view="top" class="quiet">真上から</button><button data-view="cross" class="quiet">折り目の方向から</button></div>
+ <div class="visual-message"><span>見るところ</span><p id="visualMessage"></p></div>
+</div>
+<article class="lesson-card">
+ <div class="lesson-top"><span id="blankBadge" class="pill accent"></span><span id="beatCount"></span></div>
+ <h2 id="lessonTitle"></h2>
+ <div id="beatDots" class="beat-dots" aria-label="この章の段階"></div>
+ <div id="lessonBody" aria-live="polite"></div>
+ <div class="navigation"><button id="prevBtn" class="back">← 戻る</button><button id="nextBtn" class="next">次の気づき →</button></div>
+ <div id="nextHint" class="next-hint"></div>
+</article>
+</section>
+<section class="carry"><div class="carry-heading"><span class="eyebrow">ここまでの道具</span><span>求めた値を、次の一手に使う。</span></div><div id="knownValues" class="known-values"></div></section>
+<details class="method"><summary>作図と立体表示について</summary><p>平面図は、すべて同じ座標モデルを縦横同じ倍率で描いています。D・Fは直線の交点、Iは内心の正確な位置に置き、角の弧と直角記号は各辺の方向から計算しています。図の形は実際の比率ですが、図だけを根拠に証明はしていません。</p><p>立体図は平行投影です。画面で見える角度は、空間での角度とは異なる場合があります。折り曲げはACを回転軸とする剛体回転で、長さは変えません。ABC側を固定し、ACE側のF・EがF′・E′へ動きます。</p><p>描画用座標：A=(0,6), B=(0,0), C=(2,0), D=(9/5,3/5), E=(9/2,0), F=(18/5,6/5), G=(0,9/4), I=(3/2,3/2)。解答自体は、三平方・方べき・角の二等分線・合同で導きます。</p></details>
+<footer>第3問 / 配点20 · 図解版 2.0 <span>← → キーでも進めます</span></footer>
+</main>
+<dialog id="problemDialog"><div class="dialog-head"><h2>問題の条件</h2><button id="closeProblem" class="quiet">閉じる ×</button></div><p>△ABCで AB=6、BC=2、∠ABC=90°。BCを直径とする円と直線ACの、C以外の交点をDとする。</p><p>Bを端点とする半直線BC上に、∠BAE=2∠BACを満たすEをとる。直線BDと直線AEの交点をFとする。</p><p>△ABEの内心をIとし、直線EIと辺ABの交点をGとする。</p><p>ACに沿って折り曲げた後のFを、このサイトではF′と表記する。∠BDF′=90°となるとき、四角錐F′−BCDGの体積を求める。</p><div class="problem-goals">順に求めるもの<br>AC → CD → AEとCEの関係 → CE → ∠BDA → DF/FB → AG/AB → 体積</div></dialog>
+<noscript>この図解の操作にはJavaScriptを有効にしてください。</noscript>
+</body></html>

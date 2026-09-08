@@ -1,0 +1,18 @@
+{
+  "version": "2.0.0",
+  "geometry": {"assertions_passed": 245, "failed": 0},
+  "browser": {
+    "engine": "Chromium",
+    "method": "Local HTML/CSS/JS injected into a real browser DOM",
+    "stages": 26,
+    "viewport_widths": [1440, 834, 390, 320],
+    "stage_viewport_combinations": 104,
+    "javascript_errors": 0,
+    "horizontal_overflows": 0,
+    "text_outside_svg": 0,
+    "overlapping_svg_text_pairs": 0,
+    "interactions": "passed",
+    "safari_device_tested": false
+  },
+  "exact_answers": {"AC": "2√10", "CD": "√10/5", "AE_over_CE": "3", "CE": "5/2", "BDA_degrees": 90, "DF_over_FB": "1/2", "AG_over_AB": "5/8", "base_area": "21/8", "height": "3√10/5", "volume": "21√10/40"}
+}

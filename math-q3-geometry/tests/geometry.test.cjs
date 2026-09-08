@@ -1,0 +1,30 @@
+'use strict';
+const assert=require('node:assert/strict');
+const M=require('../geometry-v2.js'),P=M.P;
+let count=0;
+const close=(a,b,name)=>{count++;assert.ok(Math.abs(a-b)<1e-9,`${name}: ${a} != ${b}`)};
+const zero=(a,name)=>close(a,0,name);
+const collinear=(a,b,c,name)=>zero(M.norm(M.cross(M.sub(a,b),M.sub(c,b))),name);
+close(M.distance(P.A,P.B),6,'AB');close(M.distance(P.B,P.C),2,'BC');close(M.angle(P.A,P.B,P.C),90,'ABC');
+close(M.distance(P.A,P.C),2*Math.sqrt(10),'AC');close(M.distance(P.D,P.O),1,'D lies on circle');
+collinear(P.A,P.D,P.C,'A-D-C');close(M.distance(P.C,P.D),Math.sqrt(10)/5,'CD');close(M.distance(P.A,P.D)*M.distance(P.A,P.C),36,'power of point');
+close(M.angle(P.B,P.A,P.E),2*M.angle(P.B,P.A,P.C),'A angle bisector');close(M.distance(P.A,P.E),3*M.distance(P.C,P.E),'AE=3CE');
+close(M.distance(P.C,P.E),2.5,'CE');close(M.distance(P.A,P.E),7.5,'AE');close(M.distance(P.B,P.E),4.5,'BE');
+zero(M.dot(M.sub(P.B,P.D),M.sub(P.A,P.D)),'BD perpendicular AC');collinear(P.A,P.F,P.E,'F on AE');collinear(P.B,P.D,P.F,'B-D-F');
+close(M.distance(P.B,P.D),M.distance(P.D,P.F),'BD=DF');close(M.distance(P.A,P.B),M.distance(P.A,P.F),'AB=AF');close(M.distance(P.D,P.F)/M.distance(P.F,P.B),.5,'DF/FB');
+collinear(P.A,P.I,P.C,'I on A bisector');collinear(P.E,P.I,P.G,'E-I-G');close(P.I[0],P.I[1],'distance I to AB and BE');
+close(Math.abs(4*P.I[0]+3*P.I[1]-18)/5,1.5,'distance I to AE');close(M.angle(P.A,P.E,P.I),M.angle(P.I,P.E,P.B),'E angle bisector');
+close(M.distance(P.A,P.G)/M.distance(P.A,P.B),5/8,'AG/AB');close(M.distance(P.B,P.G)/6,3/8,'BG/AB');
+close(M.area([P.B,P.C,P.D,P.G]),21/8,'base area');close(M.area([P.B,P.C,P.D]),3/5,'BCD area');close(M.area([P.B,P.D,P.G]),81/40,'BDG area');
+close(M.area([P.A,P.B,P.C]),6,'ABC area');close(M.area([P.A,P.B,P.C]),.5*M.distance(P.A,P.C)*M.distance(P.B,P.D),'base AC height BD');
+for(let angle=0;angle<=90;angle+=5){
+ const F=M.fold(P.F,angle),E=M.fold(P.E,angle);
+ for(const k of ['A','C','D'])zero(M.distance(M.fold(P[k],angle),P[k]),`axis ${k} fixed at ${angle}`);
+ close(M.distance(P.A,E),7.5,`AE preserved ${angle}`);close(M.distance(P.C,E),2.5,`CE preserved ${angle}`);
+ close(M.distance(P.D,F),M.height,`DF preserved ${angle}`);close(M.distance(P.A,F),6,`AF preserved ${angle}`);
+ collinear(P.A,F,E,`F on AE ${angle}`);zero(M.dot(M.sub(F,P.D),M.axis),`DF perpendicular AC ${angle}`);
+ close(M.angle(P.B,P.D,F),180-angle,`fold angle complement ${angle}`);close(F[2],M.height*Math.sin(angle*Math.PI/180),`height sin ${angle}`);
+}
+const F=M.fold(P.F,90);close(F[0],P.D[0],'F vertical above D, x');close(F[1],P.D[1],'F vertical above D, y');close(F[2],M.height,'final height');
+close(M.baseArea*F[2]/3,M.volume,'pyramid volume');close(M.volume,21*Math.sqrt(10)/40,'answer');
+console.log(JSON.stringify({suite:'Euclidean geometry and rigid folding',passed:count,failed:0,volume:M.volume},null,2));
