@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>第3問 視覚解説 | 数学A 図形の性質</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">GitHub Pages 向け・静的サイト</p>
+      <h1>第3問の視覚解説</h1>
+      <p class="lead">
+        図形の関係が見えるように、各ステップを <strong>図 + 最小限の式</strong> で整理したページです。
+        単なる文字解説ではなく、<strong>なぜそう見えるのか</strong> を追える構成にしています。
+      </p>
+      <div class="hero-tags">
+        <span>数学A</span>
+        <span>図形の性質</span>
+        <span>円</span>
+        <span>角の二等分線</span>
+        <span>空間図形</span>
+      </div>
+      <nav class="quick-nav">
+        <a href="#setup">基本図形</a>
+        <a href="#e-point">点E</a>
+        <a href="#f-point">点F</a>
+        <a href="#g-point">点G</a>
+        <a href="#volume">体積</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="summary card">
+      <h2>最終結果一覧</h2>
+      <div class="answer-grid">
+        <div><span>AC</span><strong>2√10</strong></div>
+        <div><span>CD</span><strong>√10 / 5</strong></div>
+        <div><span>AE</span><strong>3CE</strong></div>
+        <div><span>CE</span><strong>5 / 2</strong></div>
+        <div><span>∠BDA</span><strong>90°</strong></div>
+        <div><span>DF / FB</span><strong>1 / 2</strong></div>
+        <div><span>AG / AB</span><strong>5 / 8</strong></div>
+        <div><span>体積</span><strong>21√10 / 40</strong></div>
+      </div>
+    </section>
+
+    <section id="setup" class="step-section">
+      <div class="step-copy">
+        <p class="step-label">STEP 1</p>
+        <h2>基本図形を座標で見る</h2>
+        <p>
+          まず図形を見やすくするために、B=(0,0), C=(2,0), A=(0,6) とおくと、
+          △ABC は直角三角形になります。
+          線分 BC を直径とする円と AC の交点が D です。
+        </p>
+        <div class="math-box">
+          <p><strong>AC = √(6² + 2²) = √40 = 2√10</strong></p>
+          <p>また、AB は円への接線なので、方べきの定理より <strong>AB² = AD・AC</strong></p>
+          <p>36 = AD・2√10 より <strong>AD = 9√10 / 5</strong></p>
+          <p>したがって <strong>CD = AC - AD = √10 / 5</strong></p>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div id="diagram-setup" class="diagram"></div>
+      </div>
+    </section>
+
+    <section id="e-point" class="step-section reverse">
+      <div class="step-copy">
+        <p class="step-label">STEP 2</p>
+        <h2>点Eは「角の二等分線」で決まる</h2>
+        <p>
+          条件 ∠BAE = 2∠BAC から、AC は △ABE における ∠BAE の二等分線です。
+          しかも C は辺 BE 上にあります。
+        </p>
+        <div class="math-box">
+          <p>角の二等分線の定理より <strong>BC : CE = BA : AE</strong></p>
+          <p>2 : CE = 6 : AE より <strong>AE = 3CE</strong></p>
+          <p>さらに角の二等分線の長さの公式 <strong>AC² = AB・AE - BC・CE</strong> を使うと</p>
+          <p>40 = 6AE - 2CE = 18CE - 2CE = 16CE</p>
+          <p>よって <strong>CE = 5 / 2</strong>、したがって <strong>AE = 15 / 2</strong></p>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div id="diagram-e" class="diagram"></div>
+      </div>
+    </section>
+
+    <section id="f-point" class="step-section">
+      <div class="step-copy">
+        <p class="step-label">STEP 3</p>
+        <h2>点Fでは「合同」が見える</h2>
+        <p>
+          F は直線 BD と直線 AE の交点です。ここで D は AC 上にあるので、
+          ∠BAD = ∠BAC です。また ∠DAF = ∠BAE - ∠BAC = ∠BAC となるため、
+          <strong>∠BAD = ∠DAF</strong> が成り立ちます。
+        </p>
+        <div class="math-box">
+          <p>D は直径 BC の円周上にあるので <strong>∠BDC = 90°</strong></p>
+          <p>A, D, C は一直線上だから <strong>∠BDA = 90°</strong></p>
+          <p>さらに B, D, F は一直線上より、<strong>∠ADF = 90°</strong></p>
+          <p>よって △ABD と △AFD は、</p>
+          <p><strong>∠BAD = ∠DAF</strong>、<strong>∠BDA = ∠ADF</strong>、<strong>AD 共通</strong> で合同</p>
+          <p>したがって <strong>BD = DF</strong>。B-D-F が一直線なので <strong>FB = BD + DF = 2DF</strong></p>
+          <p>つまり <strong>DF / FB = 1 / 2</strong></p>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div id="diagram-f" class="diagram"></div>
+      </div>
+    </section>
+
+    <section id="g-point" class="step-section reverse">
+      <div class="step-copy">
+        <p class="step-label">STEP 4</p>
+        <h2>内心Iから点Gの比を読む</h2>
+        <p>
+          I は △ABE の内心なので、EI は ∠AEB の二等分線です。
+          その EI と AB の交点が G です。
+        </p>
+        <div class="math-box">
+          <p>EB = BC + CE = 2 + 5/2 = <strong>9/2</strong></p>
+          <p>角の二等分線の定理より <strong>AG : GB = AE : EB</strong></p>
+          <p>= 15/2 : 9/2 = 5 : 3</p>
+          <p>よって <strong>AG / AB = 5 / (5+3) = 5 / 8</strong></p>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div id="diagram-g" class="diagram"></div>
+      </div>
+    </section>
+
+    <section id="volume" class="step-section">
+      <div class="step-copy">
+        <p class="step-label">STEP 5</p>
+        <h2>折り曲げた後は「底面積 × 高さ」</h2>
+        <p>
+          AC に沿って折り曲げると、F は F′ に移ります。問題の条件より ∠BDF′ = 90°。
+          もともと D は AC 上にあり、DF は AC に垂直な方向として見られるため、折り曲げ後の F′D は
+          底面 BCDG に垂直な高さとみなせます。
+        </p>
+        <div class="math-box">
+          <p>△BCD は直角三角形なので</p>
+          <p><strong>BD² = BC² - CD² = 4 - 2/5 = 18/5</strong></p>
+          <p>よって <strong>BD = 3√10 / 5</strong></p>
+          <p>合同より <strong>DF = BD = 3√10 / 5</strong>。したがって高さも <strong>3√10 / 5</strong></p>
+          <p>底面積は <strong>[BCDG] = [BCD] + [BDG] = 3/5 + 81/40 = 21/8</strong></p>
+          <p>よって体積</p>
+          <p><strong>V = (1/3) × (21/8) × (3√10/5) = 21√10 / 40</strong></p>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div id="diagram-volume" class="diagram"></div>
+      </div>
+    </section>
+
+    <section class="card takeaway">
+      <h2>この問題の見どころ</h2>
+      <ul>
+        <li><strong>接線と円</strong> → 方べきの定理で CD を出す</li>
+        <li><strong>∠BAE = 2∠BAC</strong> → AC が角の二等分線だと見る</li>
+        <li><strong>合同</strong> → △ABD ≡ △AFD から DF / FB = 1 / 2</li>
+        <li><strong>内心</strong> → EI が角の二等分線だから AG / AB を一発で出せる</li>
+        <li><strong>折り曲げ</strong> → 3D に見えても最後は底面積と高さ</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>このページは GitHub Pages でそのまま公開できる静的サイトです。</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
