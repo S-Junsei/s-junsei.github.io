@@ -3,8 +3,14 @@ function setupCanvas(canvas) {
   const rect = canvas.getBoundingClientRect();
   const width = Math.max(280, Math.floor(rect.width));
   const height = Math.max(180, Math.floor(rect.height));
-  canvas.width = Math.floor(width * dpr);
-  canvas.height = Math.floor(height * dpr);
+  const pixelWidth = Math.max(1, Math.floor(width * dpr));
+  const pixelHeight = Math.max(1, Math.floor(height * dpr));
+
+  if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+    canvas.width = pixelWidth;
+    canvas.height = pixelHeight;
+  }
+
   const ctx = canvas.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   return { ctx, width, height };
